@@ -3,9 +3,9 @@
 #include <math.h>
 
 void initial_condition(double Ti, double nx, double *T,double dx,double *x, double *y, double T2,double *T_future);
-void cond_fijas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso);
-void cond_periodicas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y);
-void cond_abiertas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y);
+void cond_fijas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso,char filename[100], char filename2[100]);
+void cond_periodicas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso,char filename[100], char filename2[100]);
+void cond_abiertas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso,char filename[100], char filename2[100]);
 double Calcular_Promedio(double *T, double NX );
 int main(){
 
@@ -16,7 +16,7 @@ double Ti=50.0;
 double T2=100.0;
 double Tcentro =1000;
 double  l = 1;
-double dx = 0.1;
+double dx = 0.05;
 double nx = (l/dx)+1;
 double alpha= 0.1;
 double dt=((dx*dx)/v)*alpha;
@@ -38,17 +38,24 @@ for(i=0;i<nx*nx;i++)
 	printf("%f %f %f\n",x[i],y[i],T[i]);
 }
 
-cond_fijas(nx,T,T_future, alpha,tf, dt,x,y,1);
+cond_fijas(nx,T,T_future, alpha,tf, dt,x,y,1, "C1_fijas_Tprom.dat","C1_fijas_x_y_T.dat");
+
+
 
 initial_condition(Ti,  nx, T,dx, x, y, T2,T_future);
-cond_periodicas(nx, T, T_future, alpha, tf, dt, x , y);
+cond_abiertas(nx, T, T_future, alpha, tf, dt, x , y,1, "C1_abiertas_Tprom.dat","C1_abiertas_x_y_T.dat");
 
 initial_condition(Ti,  nx, T,dx, x, y, T2,T_future);
-cond_abiertas(nx, T, T_future, alpha, tf, dt, x , y);
+cond_fijas(nx,T,T_future, alpha,tf, dt,x,y,2,"C2_fijas_Tprom.dat","C2_fijas_x_y_T.dat");
 
 initial_condition(Ti,  nx, T,dx, x, y, T2,T_future);
-cond_fijas(nx,T,T_future, alpha,tf, dt,x,y,2);
+cond_periodicas(nx, T, T_future, alpha, tf, dt, x , y,2, "C2_periodicas_Tprom.dat","C2_periodicas_x_y_T.dat");
 
+initial_condition(Ti,  nx, T,dx, x, y, T2,T_future);
+cond_abiertas(nx, T, T_future, alpha, tf, dt, x , y,2, "C2_abiertas_Tprom.dat","C2_abiertas_x_y_T.dat");
+
+initial_condition(Ti,  nx, T,dx, x, y, T2,T_future);
+cond_periodicas(nx, T, T_future, alpha, tf, dt, x , y,1, "C1_periodicas_Tprom.dat","C1_periodicas_x_y_T.dat");
 return 0;
 }
 
@@ -92,14 +99,15 @@ void initial_condition(double Ti, double nx, double *T,double dx,double *x,doubl
 
 	
 }
-void cond_fijas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso)
+void cond_fijas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso, char filename[100], char filename2[100])
 {
 	FILE *in;
-char filename[100]= "C1_fijas_Tprom.dat";
+/* 
+char filename[100]= "C1_fijas_Tprom.dat";*/
 in = fopen(filename,"w");
 
 	FILE *in2;
-char filename2[100]= "C1_fijas_x_y_T.dat";
+/*char filename2[100]= "C1_fijas_x_y_T.dat";*/
 in2 = fopen(filename2,"w");
 
 	int i;
@@ -157,22 +165,28 @@ for(i=0;i<nx*nx;i++)
 
 
 
-void cond_periodicas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y)
+void cond_periodicas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso,char filename[100], char filename2[100])
 {
 	FILE *in;
-char filename[100]= "C1_periodicas_Tprom.dat";
+
 in = fopen(filename,"w");
 
 	FILE *in2;
-char filename2[100]= "C1_periodicas_x_y_T.dat";
+
 in2 = fopen(filename2,"w");
 
 
 	int i;
 	int j;
 	int k;
+	double T2=100.0;
 	double nt = tf/dt;
 	double T_prom = 0.0;
+	
+	FILE *gif;
+
+gif = fopen("animacion.dat","w");
+
 /* Utilizamos recorrido en el tiempo para la difusion*/
 for(k=0;k<nt;k++)
 {
@@ -208,8 +222,26 @@ for(k=0;k<nt;k++)
 	T_future[i]=T[i]+ alpha*(T[i-1]-4*T[i]+T[i+1]+T[i+(int)nx]+T[i-(int)nx]); 	
 	}
 	}
+	/* si es el caso 2 matener la temperatura del cuadrad del centro en 100 c */
+if(caso == 2)
+{
+for(i=0;i<nx*nx;i++)
+	{
+	if(x[i]>=0.2 && x[i]<=0.40 && y[i]>=0.45 && y[i]<=0.55)
+	{
+		T_future[i] = T2;
+	}		
+}
+}	
+ if(caso==1)
+	{
+	for(i=0;i<nx*nx;i++)	
+		{
+		fprintf(gif,"%f %f %f \n",x[i],y[i],T[i]);	
+		}
+	}	
 		
- 
+	
 	T_prom = Calcular_Promedio(T,nx*nx);
  	fprintf(in,"%f %f \n",k*dt,T_prom);
 
@@ -240,20 +272,21 @@ return T_prom;
 	
 }
 
-void cond_abiertas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y)
+void cond_abiertas(double nx, double *T,double *T_future, double alpha, double tf, double dt,double *x ,double *y,int caso,char filename[100], char filename2[100])
 {
 	FILE *in;
-char filename[100]= "C1_abiertas_Tprom.dat";
+
 in = fopen(filename,"w");
 
 	FILE *in2;
-char filename2[100]= "C1_abiertas_x_y_T.dat";
+
 in2 = fopen(filename2,"w");
 
 
 	int i;
 	int j;
 	int k;
+	double T2=100.0;
 	double nt = tf/dt;
 	double T_prom = 0.0;
 /* Utilizamos recorrido en el tiempo para la difusion*/
@@ -291,7 +324,17 @@ for(k=0;k<nt;k++)
 	T_future[i]=T[i]+ alpha*(T[i-1]-4*T[i]+T[i+1]+T[i+(int)nx]+T[i-(int)nx]); 	
 	}
 	}
-		
+	/* si es el caso 2 matener la temperatura del cuadrad del centro en 100 c */
+if(caso == 2)
+{
+for(i=0;i<nx*nx;i++)
+	{
+	if(x[i]>=0.2 && x[i]<=0.40 && y[i]>=0.45 && y[i]<=0.55)
+	{
+		T_future[i] = T2;
+	}		
+}
+}	
  
 	T_prom = Calcular_Promedio(T,nx*nx);
  	fprintf(in,"%f %f \n",k*dt,T_prom);

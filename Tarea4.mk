@@ -3,9 +3,10 @@
 
 
 
-
-
-imagen.png: Plots_Temperatura.py datos.dat
+	
+Resultados_HW4.pdf : Resultados_HW4.tex
+	pdflatex Resultados_HW4.tex
+*.png: Plots_Temperatura.py datos.dat
 	python Plots_Temperatura.py
 datos.dat: a.out 
 	./a.out > datos.dat

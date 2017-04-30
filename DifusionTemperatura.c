@@ -16,7 +16,10 @@ double Ti=50.0;
 double T2=100.0;
 double Tcentro =1000;
 double  l = 1;
-double dx = 0.05;
+
+/* por motivos de procesamiento de mi computador , un dx menor toma DEMSASIADO tiempo para correr, solo se necestia cambiar esta magnitud por 0.01 y en el punto py n=1021 y n2=101 cambiar respectivamente */
+double dx = 0.05;  
+
 double nx = (l/dx)+1;
 double alpha= 0.1;
 double dt=((dx*dx)/v)*alpha;

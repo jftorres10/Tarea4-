@@ -1,10 +1,7 @@
 	
 
 
-
-
-	
-Resultados_HW4.pdf : Resultados_HW4.tex
+Resultados_HW4.pdf : Resultados_HW4.tex *.png
 	pdflatex Resultados_HW4.tex
 *.png: Plots_Temperatura.py datos.dat
 	python Plots_Temperatura.py

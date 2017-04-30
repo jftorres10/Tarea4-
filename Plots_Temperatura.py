@@ -155,12 +155,3 @@ ax = fig.gca(projection='3d')
 anim = animation.FuncAnimation(fig, update,frames=500, interval=20) 
 
 anim.save("animacionbono.mp4")
-
-
-
-
-
-
-
-
-
